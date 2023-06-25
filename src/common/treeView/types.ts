@@ -48,7 +48,7 @@ export abstract class TreeViewSelectionController<
   abstract getSelectable(item: T): S;
 
   abstract select(item: T): void;
-  abstract deselect(itme: T): void;
+  abstract deselect(item: T): void;
 
   abstract getSelectedItems(): T[];
   abstract clear(): void;
