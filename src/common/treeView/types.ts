@@ -12,13 +12,11 @@ export enum SelectionState {
   Intermediate,
 }
 
-export abstract class TreeItem {
+export class TreeItem {
   constructor(
     public label: string,
     public collapsibleState: CollapsibleState
   ) {}
-
-  abstract clone(): TreeItem;
 }
 
 export abstract class TreeViewDataProvider<T = any> {

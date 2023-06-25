@@ -118,7 +118,7 @@ export class EagerSelectionController extends TreeViewSelectionController<TreeIt
   private fireSelectionDidChange(selectedItems: TreeItem[]) {
     this.onSelectionDidChange.dispatchEvent(
       new CustomEvent('change', {
-        detail: selectedItems.map((it) => toRaw(it).clone()),
+        detail: selectedItems.map((it) => toRaw(it)),
       })
     );
   }

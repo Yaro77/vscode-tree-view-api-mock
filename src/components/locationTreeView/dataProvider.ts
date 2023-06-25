@@ -25,15 +25,6 @@ export class LocationNode extends TreeItem {
   ) {
     super(name, collapsibleState);
   }
-
-  clone() {
-    return new LocationNode(
-      this.label,
-      this.collapsibleState,
-      this.id,
-      this.type
-    );
-  }
 }
 
 export class LocationTreeViewDataProvider extends TreeViewDataProvider<LocationNode> {

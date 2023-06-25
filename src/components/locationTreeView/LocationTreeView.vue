@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="location-tree-view">
     <div><button @click="clearSelection">Clear</button></div>
     <TreeView
       :data-provider="dataProvider"
@@ -66,6 +66,10 @@ export interface Props {
   referenceDescription?: RefDescription;
 }
 
+const emit = defineEmits<{
+  'selection-changed': [selection: any[]];
+}>();
+
 const props = defineProps<Props>();
 
 const { referenceDescription } = toRefs(props);
@@ -95,8 +99,12 @@ watch(
   { immediate: true }
 );
 
+function cloneLocationNode(n: LocationNode) {
+  return new LocationNode(n.label, n.collapsibleState, n.id, n.type);
+}
+
 function onSelectionDidChange(e: any) {
-  console.log('selection did change', e.detail);
+  emit('selection-changed', e.detail.map(cloneLocationNode));
 }
 
 function clearSelection() {
@@ -110,8 +118,24 @@ function clearSelection() {
 </script>
 
 <style lang="scss" scoped>
+.location-tree-view {
+  display: flex;
+  flex-flow: column nowrap;
+  gap: 4px;
+
+  > :nth-child(1) {
+    flex: 0 0 auto;
+    align-self: end;
+  }
+
+  > :nth-child(2) {
+    flex: 1 1 0;
+  }
+}
 .tree-view {
   font-family: monospace;
+  height: 100%;
+  overflow-y: auto;
 }
 @mixin control {
   cursor: pointer;
