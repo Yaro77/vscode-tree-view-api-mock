@@ -38,11 +38,8 @@ export type Selectable<T> = T & SelectableEntity;
 
 export abstract class TreeViewSelectionController<
   T extends TreeItem = TreeItem,
-  S extends Selectable<T> = Selectable<T>,
-  D = any
+  S extends Selectable<T> = Selectable<T>
 > {
-  constructor(protected dataProvider: TreeViewDataProvider<D>) {}
-
   abstract get onSelectionDidChange(): EventTarget;
 
   abstract getSelectable(item: T): S;

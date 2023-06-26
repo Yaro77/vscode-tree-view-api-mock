@@ -7,14 +7,13 @@ import {
 } from './types';
 
 import type { Selectable } from './types';
-import { LocationNode } from '@/components/locationTreeView/dataProvider';
 
 export class EagerSelectionController extends TreeViewSelectionController<TreeItem> {
   private selectionDidChangeEventTarget: EventTarget = new EventTarget();
   private selectedItems: TreeItem[] = [];
 
-  constructor(dataProvider: TreeViewDataProvider) {
-    super(dataProvider);
+  constructor(private dataProvider: TreeViewDataProvider) {
+    super();
   }
 
   get onSelectionDidChange(): EventTarget {
