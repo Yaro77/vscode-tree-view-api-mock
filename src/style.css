@@ -4,7 +4,6 @@
   font-weight: 400;
 
   color: #eee;
-  background-color: #242424;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -21,7 +20,8 @@
 }
 
 body {
-  background-color: #242424;
+  /* background-color: #242424; */
+  /* background-color: #fff; */
   height: calc(100vh - 16px);
   overflow: hidden;
   position: relative;

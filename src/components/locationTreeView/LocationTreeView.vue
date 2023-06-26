@@ -8,26 +8,9 @@
     >
       <template v-slot:empty-tree>No locations</template>
       <template v-slot:node="nodeObj">
-        <SimpleSelectTreeItemLayoutExample v-bind="nodeObj" />
+        <TreeViewNodeLayoutExample v-bind="nodeObj" />
       </template>
-      <!-- <template v-slot:node-collapsible-state="{ item, expand, collapse }">
-        <span
-          v-if="item.collapsibleState === CollapsibleState.Collapsed"
-          @click="expand"
-          class="ltv-expansion"
-          >▸
-        </span>
-        <span
-          v-if="item.collapsibleState === CollapsibleState.Expanded"
-          @click="collapse"
-          class="ltv-expansion"
-          >▾
-        </span>
-        <span v-if="item.collapsibleState === CollapsibleState.None"
-          >&nbsp;</span
-        >
-      </template>
-      <template v-slot:node-selection-state="{ item, select, deselect }">
+      <!-- <template v-slot:node-selection-state="{ item, select, deselect }">
         <span
           v-if="item.selectionState === SelectionState.Unselected"
           @click="select(item)"
@@ -46,10 +29,7 @@
           class="ltv-selection"
           >[▪]
         </span>
-      </template>
-      <template v-slot:node-label="{ item, toggleCollapsibleState }"
-        ><span>{{ item.label }}</span></template
-      > -->
+      </template> -->
     </TreeView>
   </div>
 </template>
@@ -67,10 +47,10 @@ import {
   LocationTreeViewItem,
   LocationNode,
 } from './dataProvider';
-import { EagerSelectionController } from '@/common/treeView/eagerSelectionController';
-import { SimpleSelectionController } from '@/common/treeView/simpleSelectionController';
+import SubtreeSelectionController from '@/common/treeView/subtreeSelectionController';
+import ClassicSelectionController from '@/common/treeView/classicSelectionController';
 import FlagIcon from '@/common/icons/FlagIcon.vue';
-import SimpleSelectTreeItemLayoutExample from './SimpleSelectTreeItemLayoutExample.vue';
+import TreeViewNodeLayoutExample from './TreeViewNodeLayoutExample.vue';
 
 export interface Props {
   referenceDescription?: RefDescription;
@@ -99,8 +79,8 @@ watch(
     }
     if (!!rd) {
       dataProvider.value = new LocationTreeViewDataProvider(rd);
-      // sc = new EagerSelectionController(dataProvider.value);
-      sc = new SimpleSelectionController();
+      // sc = new SubtreeSelectionController(dataProvider.value);
+      sc = new ClassicSelectionController();
       sc.onSelectionDidChange.addEventListener('change', onSelectionDidChange);
       selectionController.value = sc;
     }

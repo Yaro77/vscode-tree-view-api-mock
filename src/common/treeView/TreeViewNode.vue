@@ -13,7 +13,13 @@
           :item="item"
           :expand="expand"
           :collapse="collapse"
-        />
+        >
+          <DefaultExpansion
+            :item="item"
+            :expand="expand"
+            :collapse="collapse"
+          />
+        </slot>
         <slot
           v-if="needRenderSelectionControl"
           name="selection-state"
@@ -28,8 +34,9 @@
           :collapse="collapse"
           :select="select"
           :deselect="deselect"
-          >{{ item.label }}</slot
         >
+          <span>{{ item.label }}</span>
+        </slot>
       </slot>
     </div>
     <ul v-if="item.collapsibleState === CollapsibleState.Expanded">
@@ -77,6 +84,7 @@ import {
   SelectionState,
   Selectable,
 } from './types';
+import DefaultExpansion from './TreeViewNodeExpansion.vue';
 
 export interface Props {
   item: TreeItem;

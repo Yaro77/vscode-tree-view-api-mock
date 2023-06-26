@@ -68,5 +68,7 @@ function clearSelectionEvents() {
 ul {
   margin: 0;
   overflow-y: auto;
+  color: #242424;
+  font-size: 0.8rem;
 }
 </style>

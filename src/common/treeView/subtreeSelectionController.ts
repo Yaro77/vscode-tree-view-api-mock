@@ -8,7 +8,7 @@ import {
 
 import type { Selectable } from './types';
 
-export class EagerSelectionController extends TreeViewSelectionController<TreeItem> {
+export default class extends TreeViewSelectionController<TreeItem> {
   private selectionDidChangeEventTarget: EventTarget = new EventTarget();
   private selectedItems: TreeItem[] = [];
 
