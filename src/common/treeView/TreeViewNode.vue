@@ -144,23 +144,23 @@ function expand() {
   item.value.collapsibleState = CollapsibleState.Expanded;
 }
 
-function select() {
+function select(event?: Event) {
   const sc = selectionController.value;
   if (!sc) {
     return;
   }
 
-  sc.select(item.value);
+  sc.select(item.value, event);
 }
 
-function deselect() {
+function deselect(event?: Event) {
   const sc = selectionController.value;
   if (!sc) {
     return;
   }
 
   const dp = dataProvider.value;
-  sc.deselect(item.value);
+  sc.deselect(item.value, event);
 }
 </script>
 

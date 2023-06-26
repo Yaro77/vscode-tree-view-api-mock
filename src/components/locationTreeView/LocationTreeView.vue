@@ -26,10 +26,11 @@
         <span
           v-if="item.selectionState === SelectionState.Selected"
           @click="deselect"
+          class="label"
         >
           [{{ item.label }}]
         </span>
-        <span v-else @click="select">{{ item.label }}</span>
+        <span v-else @click="select" class="label">{{ item.label }}</span>
       </template>
       <!-- <template v-slot:node-collapsible-state="{ item, expand, collapse }">
         <span
@@ -174,5 +175,9 @@ function clearSelection() {
 
 .ltv-selection {
   @include control();
+}
+
+.label {
+  user-select: none;
 }
 </style>

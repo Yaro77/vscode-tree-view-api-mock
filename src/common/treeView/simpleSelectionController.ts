@@ -19,16 +19,38 @@ export class SimpleSelectionController extends TreeViewSelectionController<TreeI
     return selectable;
   }
 
-  select(item: TreeItem): void {
-    this.selectInternal(item);
-
-    this.fireSelectionDidChange([...this.selectedItems]);
+  select(item: TreeItem, event?: Event): void {
+    if (event && event instanceof PointerEvent) {
+      const pe = event as PointerEvent;
+      if (pe.shiftKey) {
+        if (!this.isSelected(item)) {
+          this.selectInternal(item);
+          this.fireSelectionDidChange([...this.selectedItems]);
+        }
+      } else if (pe.ctrlKey) {
+        if (this.isSelected(item)) {
+          this.deselectInternal(item);
+        } else {
+          this.selectInternal(item);
+        }
+        this.fireSelectionDidChange([...this.selectedItems]);
+      } else {
+        if (!this.isSelected(item)) {
+          this.clearInternal();
+          this.selectInternal(item);
+          this.fireSelectionDidChange([...this.selectedItems]);
+        }
+      }
+    } else {
+      if (!this.isSelected(item)) {
+        this.selectInternal(item);
+        this.fireSelectionDidChange([...this.selectedItems]);
+      }
+    }
   }
 
-  deselect(item: TreeItem): void {
-    this.deselectInternal(item);
-
-    this.fireSelectionDidChange([...this.selectedItems]);
+  deselect(item: TreeItem, event?: Event): void {
+    this.select(item, event);
   }
 
   private selectInternal(item: TreeItem): void {
@@ -49,6 +71,10 @@ export class SimpleSelectionController extends TreeViewSelectionController<TreeI
     return [...this.selectedItems];
   }
 
+  private isSelected(item: TreeItem): boolean {
+    return this.selectedItems.has(item);
+  }
+
   private fireSelectionDidChange(selectedItems: TreeItem[]) {
     this.onSelectionDidChange.dispatchEvent(
       new CustomEvent('change', {
@@ -58,9 +84,13 @@ export class SimpleSelectionController extends TreeViewSelectionController<TreeI
   }
 
   clear(): void {
-    const selected = [...this.selectedItems];
-    selected.forEach((item: TreeItem) => this.deselectInternal(item));
+    this.clearInternal();
 
     this.fireSelectionDidChange([...this.selectedItems]);
+  }
+
+  private clearInternal(): void {
+    const selected = [...this.selectedItems];
+    selected.forEach((item: TreeItem) => this.deselectInternal(item));
   }
 }
