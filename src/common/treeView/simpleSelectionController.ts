@@ -35,11 +35,9 @@ export class SimpleSelectionController extends TreeViewSelectionController<TreeI
         }
         this.fireSelectionDidChange([...this.selectedItems]);
       } else {
-        if (!this.isSelected(item)) {
-          this.clearInternal();
-          this.selectInternal(item);
-          this.fireSelectionDidChange([...this.selectedItems]);
-        }
+        this.clearInternal();
+        this.selectInternal(item);
+        this.fireSelectionDidChange([...this.selectedItems]);
       }
     } else {
       if (!this.isSelected(item)) {

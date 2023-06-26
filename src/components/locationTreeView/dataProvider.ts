@@ -9,7 +9,7 @@ import type {
 } from '@/common/types';
 import { IdName } from 'common/types';
 
-enum LocationNodeType {
+export enum LocationNodeType {
   Country,
   Region,
   Location,

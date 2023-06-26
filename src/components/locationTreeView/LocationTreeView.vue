@@ -7,30 +7,8 @@
       node-key="id"
     >
       <template v-slot:empty-tree>No locations</template>
-      <template v-slot:node="{ item, select, deselect, expand, collapse }">
-        <span
-          v-if="item.collapsibleState === CollapsibleState.Collapsed"
-          @click="expand"
-          class="ltv-expansion"
-          >▸
-        </span>
-        <span
-          v-if="item.collapsibleState === CollapsibleState.Expanded"
-          @click="collapse"
-          class="ltv-expansion"
-          >▾
-        </span>
-        <span v-if="item.collapsibleState === CollapsibleState.None"
-          >&nbsp;</span
-        >
-        <span
-          v-if="item.selectionState === SelectionState.Selected"
-          @click="deselect"
-          class="label"
-        >
-          [{{ item.label }}]
-        </span>
-        <span v-else @click="select" class="label">{{ item.label }}</span>
+      <template v-slot:node="nodeObj">
+        <SimpleSelectTreeItemLayoutExample v-bind="nodeObj" />
       </template>
       <!-- <template v-slot:node-collapsible-state="{ item, expand, collapse }">
         <span
@@ -79,14 +57,20 @@
 <script setup lang="ts">
 import { ref, watch, toRefs } from 'vue';
 import TreeView from '@/common/treeView/TreeView.vue';
-import { CollapsibleState, SelectionState } from '@/common/treeView/types';
+import {
+  CollapsibleState,
+  SelectionState,
+  TreeViewSelectionController,
+} from '@/common/treeView/types';
 import {
   LocationTreeViewDataProvider,
   LocationTreeViewItem,
   LocationNode,
 } from './dataProvider';
-// import { EagerSelectionController } from '@/common/treeView/eagerSelectionController';
+import { EagerSelectionController } from '@/common/treeView/eagerSelectionController';
 import { SimpleSelectionController } from '@/common/treeView/simpleSelectionController';
+import FlagIcon from '@/common/icons/FlagIcon.vue';
+import SimpleSelectTreeItemLayoutExample from './SimpleSelectTreeItemLayoutExample.vue';
 
 export interface Props {
   referenceDescription?: RefDescription;
@@ -101,10 +85,7 @@ const props = defineProps<Props>();
 const { referenceDescription } = toRefs(props);
 
 const dataProvider = ref<LocationTreeViewDataProvider | undefined>();
-const selectionController = ref<
-  // EagerSelectionController | undefined
-  SimpleSelectionController | undefined
->();
+const selectionController = ref<TreeViewSelectionController | undefined>();
 
 watch(
   referenceDescription,
@@ -179,5 +160,11 @@ function clearSelection() {
 
 .label {
   user-select: none;
+}
+
+.item-container {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 </style>
