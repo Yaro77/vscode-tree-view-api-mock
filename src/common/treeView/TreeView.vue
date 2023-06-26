@@ -8,16 +8,19 @@
         :node-key="nodeKey"
         :item="node"
       >
-        <template v-slot:collapsible-state="collapsibleState">
-          <slot name="node-collapsible-state" v-bind="collapsibleState" />
+        <template v-slot:default="defaultSlot">
+          <slot name="node" v-bind="defaultSlot" />
+        </template>
+        <template v-slot:collapsible-state="collapsibleStateSlot">
+          <slot name="node-collapsible-state" v-bind="collapsibleStateSlot" />
         </template>
 
-        <template v-slot:selection-state="selectionState">
-          <slot name="node-selection-state" v-bind="selectionState" />
+        <template v-slot:selection-state="selectionStateSlot">
+          <slot name="node-selection-state" v-bind="selectionStateSlot" />
         </template>
 
-        <template v-slot:label="label">
-          <slot name="node-label" v-bind="label" />
+        <template v-slot:label="labelSlot">
+          <slot name="node-label" v-bind="labelSlot" />
         </template>
       </TreeViewNode>
     </ul>

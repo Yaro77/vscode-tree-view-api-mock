@@ -2,19 +2,35 @@
   <li class="tvn">
     <div>
       <slot
-        name="collapsible-state"
         :item="item"
         :expand="expand"
         :collapse="collapse"
-      />
-      <slot
-        v-if="needRenderSelectionControl"
-        name="selection-state"
-        :item="item"
         :select="select"
         :deselect="deselect"
-      />
-      <slot name="label" :item="item">{{ item.label }}</slot>
+      >
+        <slot
+          name="collapsible-state"
+          :item="item"
+          :expand="expand"
+          :collapse="collapse"
+        />
+        <slot
+          v-if="needRenderSelectionControl"
+          name="selection-state"
+          :item="item"
+          :select="select"
+          :deselect="deselect"
+        />
+        <slot
+          name="label"
+          :item="item"
+          :expand="expand"
+          :collapse="collapse"
+          :select="select"
+          :deselect="deselect"
+          >{{ item.label }}</slot
+        >
+      </slot>
     </div>
     <ul v-if="item.collapsibleState === CollapsibleState.Expanded">
       <TreeViewNode
@@ -24,14 +40,17 @@
         :node-key="nodeKey"
         :key="child[nodeKey]"
       >
-        <template v-slot:collapsible-state="collapsibleState">
-          <slot name="collapsible-state" v-bind="collapsibleState" />
+        <template v-slot:default="defaultSlot">
+          <slot v-bind="defaultSlot" />
         </template>
-        <template v-slot:selection-state="selectionState">
-          <slot name="selection-state" v-bind="selectionState" />
+        <template v-slot:collapsible-state="collapsibleStateSlot">
+          <slot name="collapsible-state" v-bind="collapsibleStateSlot" />
         </template>
-        <template v-slot:label="label">
-          <slot name="label" v-bind="label" />
+        <template v-slot:selection-state="selectionStateSlot">
+          <slot name="selection-state" v-bind="selectionStateSlot" />
+        </template>
+        <template v-slot:label="labelSlot">
+          <slot name="label" v-bind="labelSlot" />
         </template>
       </TreeViewNode>
     </ul>

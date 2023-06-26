@@ -7,7 +7,31 @@
       node-key="id"
     >
       <template v-slot:empty-tree>No locations</template>
-      <template v-slot:node-collapsible-state="{ item, expand, collapse }">
+      <template v-slot:node="{ item, select, deselect, expand, collapse }">
+        <span
+          v-if="item.collapsibleState === CollapsibleState.Collapsed"
+          @click="expand"
+          class="ltv-expansion"
+          >▸
+        </span>
+        <span
+          v-if="item.collapsibleState === CollapsibleState.Expanded"
+          @click="collapse"
+          class="ltv-expansion"
+          >▾
+        </span>
+        <span v-if="item.collapsibleState === CollapsibleState.None"
+          >&nbsp;</span
+        >
+        <span
+          v-if="item.selectionState === SelectionState.Selected"
+          @click="deselect"
+        >
+          [{{ item.label }}]
+        </span>
+        <span v-else @click="select">{{ item.label }}</span>
+      </template>
+      <!-- <template v-slot:node-collapsible-state="{ item, expand, collapse }">
         <span
           v-if="item.collapsibleState === CollapsibleState.Collapsed"
           @click="expand"
@@ -46,7 +70,7 @@
       </template>
       <template v-slot:node-label="{ item, toggleCollapsibleState }"
         ><span>{{ item.label }}</span></template
-      >
+      > -->
     </TreeView>
   </div>
 </template>
@@ -60,7 +84,8 @@ import {
   LocationTreeViewItem,
   LocationNode,
 } from './dataProvider';
-import { EagerSelectionController } from '@/common/treeView/eagerSelectionController';
+// import { EagerSelectionController } from '@/common/treeView/eagerSelectionController';
+import { SimpleSelectionController } from '@/common/treeView/simpleSelectionController';
 
 export interface Props {
   referenceDescription?: RefDescription;
@@ -76,7 +101,8 @@ const { referenceDescription } = toRefs(props);
 
 const dataProvider = ref<LocationTreeViewDataProvider | undefined>();
 const selectionController = ref<
-  LocationTreeViewSelectionController | undefined
+  // EagerSelectionController | undefined
+  SimpleSelectionController | undefined
 >();
 
 watch(
@@ -91,7 +117,8 @@ watch(
     }
     if (!!rd) {
       dataProvider.value = new LocationTreeViewDataProvider(rd);
-      sc = new EagerSelectionController(dataProvider.value);
+      // sc = new EagerSelectionController(dataProvider.value);
+      sc = new SimpleSelectionController();
       sc.onSelectionDidChange.addEventListener('change', onSelectionDidChange);
       selectionController.value = sc;
     }
