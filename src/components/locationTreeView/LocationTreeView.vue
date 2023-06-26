@@ -7,29 +7,12 @@
       node-key="id"
     >
       <template v-slot:empty-tree>No locations</template>
-      <template v-slot:node="nodeObj">
+      <!-- <template v-slot:node="nodeObj">
         <TreeViewNodeLayoutExample v-bind="nodeObj" />
-      </template>
-      <!-- <template v-slot:node-selection-state="{ item, select, deselect }">
-        <span
-          v-if="item.selectionState === SelectionState.Unselected"
-          @click="select(item)"
-          class="ltv-selection"
-          >[ ]
-        </span>
-        <span
-          v-if="item.selectionState === SelectionState.Selected"
-          @click="deselect(item)"
-          class="ltv-selection"
-          >[✔]
-        </span>
-        <span
-          v-if="item.selectionState === SelectionState.Intermediate"
-          @click="select(item)"
-          class="ltv-selection"
-          >[▪]
-        </span>
       </template> -->
+      <template v-slot:node-selection-state="selectionStateObj">
+        <TreeViewNodeCheckMarkExample v-bind="selectionStateObj" />
+      </template>
     </TreeView>
   </div>
 </template>
@@ -51,6 +34,7 @@ import SubtreeSelectionController from '@/common/treeView/subtreeSelectionContro
 import ClassicSelectionController from '@/common/treeView/classicSelectionController';
 import FlagIcon from '@/common/icons/FlagIcon.vue';
 import TreeViewNodeLayoutExample from './TreeViewNodeLayoutExample.vue';
+import TreeViewNodeCheckMarkExample from './TreeViewNodeCheckMarkExample.vue';
 
 export interface Props {
   referenceDescription?: RefDescription;
@@ -79,8 +63,8 @@ watch(
     }
     if (!!rd) {
       dataProvider.value = new LocationTreeViewDataProvider(rd);
-      // sc = new SubtreeSelectionController(dataProvider.value);
-      sc = new ClassicSelectionController();
+      sc = new SubtreeSelectionController(dataProvider.value);
+      // sc = new ClassicSelectionController();
       sc.onSelectionDidChange.addEventListener('change', onSelectionDidChange);
       selectionController.value = sc;
     }
