@@ -4,6 +4,7 @@
     <TreeView
       :data-provider="dataProvider"
       :selection-controller="selectionController"
+      :node-comparer="labelAscComparer"
       node-key="id"
     >
       <template v-slot:empty-tree>No locations</template>
@@ -71,6 +72,22 @@ watch(
   },
   { immediate: true }
 );
+
+function labelAscComparer(a: TreeItem, b: TreeItem): number {
+  if (a.label < b.label) {
+    return -1;
+  }
+  if (a.label > b.label) {
+    return 1;
+  }
+  return 0;
+}
+
+function invert(comparer: TreeItemComparer) {
+  return (a: TreeItem, b: TreeItem) => {
+    return -comparer(a, b);
+  };
+}
 
 function cloneLocationNode(n: LocationNode) {
   return new LocationNode(n.label, n.collapsibleState, n.id, n.type);

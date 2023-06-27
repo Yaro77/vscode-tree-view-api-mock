@@ -54,3 +54,7 @@ export abstract class TreeViewSelectionController<
 export const SelectionControllerKey = Symbol() as InjectionKey<
   TreeViewSelectionController<any>
 >;
+
+export type TreeItemComparer = (a: TreeItem, b: TreeItem) => number;
+
+export const TreeItemComparerKey = Symbol() as InjectionKey<TreeItemComparer>;

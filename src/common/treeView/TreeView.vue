@@ -35,22 +35,26 @@ import {
   DataProviderKey,
   TreeViewSelectionController,
   SelectionControllerKey,
+  TreeItemComparerKey,
 } from './types';
 import TreeViewNode from './TreeViewNode.vue';
 
 export interface Props {
   dataProvider?: TreeViewDataProvider<any>;
   selectionController?: TreeViewSelectionController<any>;
+  nodeComparer?: TreeItemComparer;
   nodeKey: string;
 }
 
 const props = defineProps<Props>();
 
-const { dataProvider, selectionController, nodeKey } = toRefs(props);
+const { dataProvider, selectionController, nodeKey, nodeComparer } =
+  toRefs(props);
 const rootNodes = ref<TreeNode[]>([]);
 
 provide(DataProviderKey, dataProvider);
 provide(SelectionControllerKey, selectionController);
+provide(TreeItemComparerKey, nodeComparer);
 
 watch(
   dataProvider,
@@ -60,14 +64,14 @@ watch(
       return;
     }
     const roots = provider.getChildren();
-    const nodes = roots.map((n: LocationNode) => provider.getTreeItem(n));
-    if (selectionController.value) {
-      rootNodes.value = nodes.map((n) =>
-        selectionController.value.getSelectable(n)
-      );
-    } else {
-      rootNodes.value = nodes;
+    let nodes = roots.map((n: LocationNode) => provider.getTreeItem(n));
+    if (nodeComparer.value) {
+      nodes.sort(nodeComparer.value);
     }
+    if (selectionController.value) {
+      nodes = nodes.map((n) => selectionController.value.getSelectable(n));
+    }
+    rootNodes.value = nodes;
   },
   { immediate: true }
 );

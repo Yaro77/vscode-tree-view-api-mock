@@ -83,6 +83,7 @@ import {
   CollapsibleState,
   SelectionState,
   Selectable,
+  TreeItemComparerKey,
 } from './types';
 import DefaultExpansion from './TreeViewNodeExpansion.vue';
 
@@ -103,6 +104,7 @@ const dataProvider = inject<TreeViewDataProvider>(DataProviderKey);
 const selectionController = inject<TreeViewSelectionController>(
   SelectionControllerKey
 );
+const nodeComparer = inject<TreeItemComparer>(TreeItemComparerKey);
 const children = ref<TreeItem[] | undefined>();
 const needRenderSelectionControl = ref<boolean>(false);
 const vm = getCurrentInstance();
@@ -138,16 +140,21 @@ function expand() {
     return;
   }
   if (children.value === undefined) {
-    const ch = dataProvider.value
+    let ch = dataProvider.value
       .getChildren(item.value)
       .map((child) => dataProvider.value.getTreeItem(child));
+
+    if (nodeComparer.value) {
+      ch.sort(nodeComparer.value);
+    }
+
     if (selectionController.value) {
-      children.value = ch.map((c) =>
+      ch = children.value = ch.map((c) =>
         selectionController.value.getSelectable(c)
       );
-    } else {
-      children.value = ch;
     }
+
+    children.value = ch;
   }
   item.value.collapsibleState = CollapsibleState.Expanded;
 }
