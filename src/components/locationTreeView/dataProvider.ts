@@ -7,7 +7,7 @@ import type {
   Location,
   LocationArea,
 } from '@/common/types';
-import { IdName } from 'common/types';
+import { IdName } from '@/common/types';
 
 export enum LocationNodeType {
   Country,
@@ -27,8 +27,11 @@ export class LocationNode extends TreeItem {
   }
 }
 
+
 export class LocationTreeViewDataProvider extends TreeViewDataProvider<LocationNode> {
-  private readonly refDescription: RefDescription;
+  private readonly refDescription: {
+    [P in keyof RefDescription]: NonNullable<RefDescription[P]>;
+  };
   private readonly countryCache: Map<number, LocationNode> = new Map();
   private readonly regionCache: Map<number, LocationNode> = new Map();
   private readonly locationCache: Map<number, LocationNode> = new Map();
@@ -38,12 +41,18 @@ export class LocationTreeViewDataProvider extends TreeViewDataProvider<LocationN
     super();
 
     this.refDescription = {
-      countries: [...(rd.countries ?? [])],
-      regions: [...(rd.regions ?? [])],
-      locations: [...(rd.locations ?? [])],
-      locationAreas: [...(rd.locationAreas ?? [])],
+      countries: [...(rd.countries || [])],
+      regions: [...(rd.regions || [])],
+      locations: [...(rd.locations || [])],
+      locationAreas: [...(rd.locationAreas || [])],
     };
   }
+
+  // @ts-ignore unused argument
+  resolveTreeItem(treeItem: TreeItem, element: LocationNode): TreeItem {
+    return treeItem;
+  }
+
 
   getChildren(element?: LocationNode): LocationNode[] {
     if (element) {
@@ -121,17 +130,17 @@ export class LocationTreeViewDataProvider extends TreeViewDataProvider<LocationN
     switch (element.type) {
       case LocationNodeType.LocationArea:
         const locationArea: LocationArea =
-          this.refDescription.locationAreas.find(
+          this.refDescription.locationAreas!.find(
             (la: LocationArea) => la.id === element.id
           )!;
         return this.locationCache.get(locationArea.locationId);
       case LocationNodeType.Location:
-        const location: Location = this.refDescription.locations.find(
+        const location: Location = this.refDescription.locations!.find(
           (loc: Location) => loc.id === element.id
         )!;
         return this.regionCache.get(location.regionId);
       case LocationNodeType.Region:
-        const region: Region = this.refDescription.regions.find(
+        const region: Region = this.refDescription.regions!.find(
           (r: Region) => r.id === element.id
         )!;
         return this.countryCache.get(region.countryId);

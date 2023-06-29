@@ -1,63 +1,31 @@
 <template>
   <li class="tvn">
     <div>
-      <slot
-        :item="item"
-        :expand="expand"
-        :collapse="collapse"
-        :select="select"
-        :deselect="deselect"
-      >
-        <slot
-          name="collapsible-state"
-          :item="item"
-          :expand="expand"
-          :collapse="collapse"
-        >
-          <DefaultExpansion
-            :item="item"
-            :expand="expand"
-            :collapse="collapse"
-          />
+      <slot :item="item" :expand="expand" :collapse="collapse" :select="select" :deselect="deselect">
+        <slot name="collapsible-state" :item="item" :expand="expand" :collapse="collapse">
+          <DefaultExpansion :item="item" :expand="expand" :collapse="collapse" />
         </slot>
-        <slot
-          v-if="needRenderSelectionControl"
-          name="selection-state"
-          :item="item"
-          :select="select"
-          :deselect="deselect"
-        />
-        <slot
-          name="label"
-          :item="item"
-          :expand="expand"
-          :collapse="collapse"
-          :select="select"
-          :deselect="deselect"
-        >
+        <slot v-if="needRenderSelectionControl" name="selection-state" :item="item" :select="select"
+          :deselect="deselect" />
+        <slot name="label" :item="item" :expand="expand" :collapse="collapse" :select="select" :deselect="deselect">
           <span>{{ item.label }}</span>
         </slot>
       </slot>
     </div>
     <ul v-if="item.collapsibleState === CollapsibleState.Expanded">
-      <TreeViewNode
-        ref="childNodes"
-        v-for="child in children"
-        :item="child"
-        :node-key="nodeKey"
-        :key="child[nodeKey]"
-      >
-        <template v-slot:default="defaultSlot">
-          <slot v-bind="defaultSlot" />
+      <TreeViewNode ref="childNodes" v-for="child in       children       " :item="child" :get-key="getKey"
+        :key="getKey(child)">
+        <template v-slot:default="defaultSlot : DefaultSlot">
+          <slot v-bind=" defaultSlot " />
         </template>
-        <template v-slot:collapsible-state="collapsibleStateSlot">
-          <slot name="collapsible-state" v-bind="collapsibleStateSlot" />
+        <template v-slot:collapsible-state=" collapsibleStateSlot: CollapsibleStateSlot ">
+          <slot name="collapsible-state" v-bind=" collapsibleStateSlot " />
         </template>
-        <template v-slot:selection-state="selectionStateSlot">
-          <slot name="selection-state" v-bind="selectionStateSlot" />
+        <template v-slot:selection-state=" selectionStateSlot: SelectionStateSlot ">
+          <slot name="selection-state" v-bind=" selectionStateSlot " />
         </template>
-        <template v-slot:label="labelSlot">
-          <slot name="label" v-bind="labelSlot" />
+        <template v-slot:label=" labelSlot: DefaultSlot ">
+          <slot name="label" v-bind=" labelSlot " />
         </template>
       </TreeViewNode>
     </ul>
@@ -69,53 +37,64 @@ import {
   ref,
   inject,
   toRefs,
-  computed,
   onBeforeUnmount,
   watch,
-  getCurrentInstance,
 } from 'vue';
 import {
   TreeItem,
-  DataProviderKey,
-  TreeViewDataProvider,
-  SelectionControllerKey,
-  TreeViewSelectionController,
   CollapsibleState,
-  SelectionState,
-  Selectable,
-  TreeItemComparerKey,
 } from './types';
+import {
+  DataProviderKey,
+  SelectionControllerKey,
+  TreeItemComparerKey,
+} from "./constants"
 import DefaultExpansion from './TreeViewNodeExpansion.vue';
+
+export interface CollapsibleStateSlot {
+  item: TreeItem
+  expand: () => void
+  collapse: () => void
+}
+
+export interface SelectionStateSlot {
+  item: TreeItem
+  select: (event?: Event) => void
+  deselect: (event?: Event) => void
+}
+
+export interface DefaultSlot {
+  item: TreeItem
+  expand: () => void
+  collapse: () => void
+  select: (event?: Event) => void
+  deselect: (event?: Event) => void
+}
 
 export interface Props {
   item: TreeItem;
-  nodeKey: string;
+  getKey: (node: TreeItem) => any;
 }
 
 const props = defineProps<Props>();
 const { item } = toRefs(props);
 const childNodes = ref();
 
-const emit = defineEmits<{
-  'item-click': [item: TreeItem];
-}>();
-
-const dataProvider = inject<TreeViewDataProvider>(DataProviderKey);
-const selectionController = inject<TreeViewSelectionController>(
-  SelectionControllerKey
-);
-const nodeComparer = inject<TreeItemComparer>(TreeItemComparerKey);
+const dataProvider = inject(DataProviderKey)!;
+const selectionController = inject(SelectionControllerKey);
+const nodeComparer = inject(TreeItemComparerKey);
 const children = ref<TreeItem[] | undefined>();
 const needRenderSelectionControl = ref<boolean>(false);
-const vm = getCurrentInstance();
 
-watch(
-  selectionController,
-  (sc) => {
-    needRenderSelectionControl.value = !!sc;
-  },
-  { immediate: true }
-);
+if (selectionController) {
+  watch(
+    selectionController,
+    (sc) => {
+      needRenderSelectionControl.value = !!sc;
+    },
+    { immediate: true }
+  );
+}
 
 onBeforeUnmount(() => {
   if (item.value.collapsibleState === CollapsibleState.Expanded) {
@@ -144,13 +123,14 @@ function expand() {
       .getChildren(item.value)
       .map((child) => dataProvider.value.getTreeItem(child));
 
-    if (nodeComparer.value) {
+    if (nodeComparer && nodeComparer.value) {
       ch.sort(nodeComparer.value);
     }
 
-    if (selectionController.value) {
+    if (selectionController && selectionController.value) {
+      const sc = selectionController.value
       ch = children.value = ch.map((c) =>
-        selectionController.value.getSelectable(c)
+        sc.getSelectable(c)
       );
     }
 
@@ -160,7 +140,7 @@ function expand() {
 }
 
 function select(event?: Event) {
-  const sc = selectionController.value;
+  const sc = selectionController?.value;
   if (!sc) {
     return;
   }
@@ -169,17 +149,15 @@ function select(event?: Event) {
 }
 
 function deselect(event?: Event) {
-  const sc = selectionController.value;
+  const sc = selectionController?.value;
   if (!sc) {
     return;
   }
 
-  const dp = dataProvider.value;
   sc.deselect(item.value, event);
 }
 </script>
 
 <style lang="scss" scoped>
-.tvn {
-}
+.tvn {}
 </style>

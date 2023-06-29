@@ -1,5 +1,3 @@
-import type { InjectionKey } from 'vue';
-
 export enum CollapsibleState {
   None,
   Collapsed,
@@ -16,7 +14,7 @@ export class TreeItem {
   constructor(
     public label: string,
     public collapsibleState: CollapsibleState
-  ) {}
+  ) { }
 }
 
 export abstract class TreeViewDataProvider<T = any> {
@@ -25,10 +23,6 @@ export abstract class TreeViewDataProvider<T = any> {
   abstract getParent?(element: T): T | undefined;
   abstract resolveTreeItem?(treeItem: TreeItem, element: T): TreeItem;
 }
-
-export const DataProviderKey = Symbol() as InjectionKey<
-  TreeViewDataProvider<any>
->;
 
 export interface SelectableEntity {
   selectionState: SelectionState;
@@ -51,10 +45,6 @@ export abstract class TreeViewSelectionController<
   abstract clear(): void;
 }
 
-export const SelectionControllerKey = Symbol() as InjectionKey<
-  TreeViewSelectionController<any>
->;
-
-export type TreeItemComparer = (a: TreeItem, b: TreeItem) => number;
-
-export const TreeItemComparerKey = Symbol() as InjectionKey<TreeItemComparer>;
+export interface TreeItemComparer {
+  (a: TreeItem, b: TreeItem): number;
+}

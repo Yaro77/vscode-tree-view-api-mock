@@ -158,9 +158,11 @@ export default class extends TreeViewSelectionController<TreeItem> {
   }
 
   private getParent(it: TreeItem): TreeItem | undefined {
-    const p = this.dataProvider.getParent(it);
-    if (p) {
-      return this.dataProvider.getTreeItem(p);
+    if (this.dataProvider.getParent) {
+      const p = this.dataProvider.getParent(it);
+      if (p) {
+        return this.dataProvider.getTreeItem(p);
+      }
     }
   }
 }

@@ -2,12 +2,7 @@
   <div class="tree-view">
     <slot v-if="isEmptyTree" name="empty-tree" />
     <ul v-else>
-      <TreeViewNode
-        v-for="node in rootNodes"
-        :key="node[nodeKey]"
-        :node-key="nodeKey"
-        :item="node"
-      >
+      <TreeViewNode v-for="node in rootNodes" :key="getKey(node)" :get-key="getKey" :item="node">
         <template v-slot:default="defaultSlot">
           <slot name="node" v-bind="defaultSlot" />
         </template>
@@ -29,28 +24,32 @@
 
 <script setup lang="ts">
 import { ref, toRefs, watch, computed, provide } from 'vue';
-import type { InjectionKey } from 'vue';
+import { } from 'vue';
 import {
+  TreeItem,
   TreeViewDataProvider,
-  DataProviderKey,
   TreeViewSelectionController,
+  TreeItemComparer,
+} from './types';
+import {
+  DataProviderKey,
   SelectionControllerKey,
   TreeItemComparerKey,
-} from './types';
+} from "./constants"
 import TreeViewNode from './TreeViewNode.vue';
 
 export interface Props {
-  dataProvider?: TreeViewDataProvider<any>;
-  selectionController?: TreeViewSelectionController<any>;
-  nodeComparer?: TreeItemComparer;
-  nodeKey: string;
+  dataProvider: TreeViewDataProvider<any>;
+  selectionController: TreeViewSelectionController<any> | undefined;
+  nodeComparer: TreeItemComparer | undefined;
+  getKey: (item: TreeItem) => any;
 }
 
 const props = defineProps<Props>();
 
-const { dataProvider, selectionController, nodeKey, nodeComparer } =
+const { dataProvider, selectionController, nodeComparer } =
   toRefs(props);
-const rootNodes = ref<TreeNode[]>([]);
+const rootNodes = ref<TreeItem[]>([]);
 
 provide(DataProviderKey, dataProvider);
 provide(SelectionControllerKey, selectionController);
@@ -64,12 +63,12 @@ watch(
       return;
     }
     const roots = provider.getChildren();
-    let nodes = roots.map((n: LocationNode) => provider.getTreeItem(n));
+    let nodes = roots.map((n: any) => provider.getTreeItem(n));
     if (nodeComparer.value) {
       nodes.sort(nodeComparer.value);
     }
     if (selectionController.value) {
-      nodes = nodes.map((n) => selectionController.value.getSelectable(n));
+      nodes = nodes.map((n) => selectionController.value!.getSelectable(n));
     }
     rootNodes.value = nodes;
   },

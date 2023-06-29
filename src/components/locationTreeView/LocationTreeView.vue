@@ -1,12 +1,8 @@
 <template>
   <div class="location-tree-view">
     <div><button @click="clearSelection">Clear</button></div>
-    <TreeView
-      :data-provider="dataProvider"
-      :selection-controller="selectionController"
-      :node-comparer="labelAscComparer"
-      node-key="id"
-    >
+    <TreeView :data-provider="dataProvider" :selection-controller="selectionController" :node-comparer="labelAscComparer"
+      :get-key="getLocationNodeKey">
       <template v-slot:empty-tree>No locations</template>
       <!-- <template v-slot:node="nodeObj">
         <TreeViewNodeLayoutExample v-bind="nodeObj" />
@@ -22,23 +18,22 @@
 import { ref, watch, toRefs } from 'vue';
 import TreeView from '@/common/treeView/TreeView.vue';
 import {
-  CollapsibleState,
-  SelectionState,
+  TreeItem,
+  TreeItemComparer,
   TreeViewSelectionController,
 } from '@/common/treeView/types';
+import { RefDescription } from "@/common/types"
 import {
   LocationTreeViewDataProvider,
-  LocationTreeViewItem,
   LocationNode,
 } from './dataProvider';
 import SubtreeSelectionController from '@/common/treeView/subtreeSelectionController';
-import ClassicSelectionController from '@/common/treeView/classicSelectionController';
-import FlagIcon from '@/common/icons/FlagIcon.vue';
-import TreeViewNodeLayoutExample from './TreeViewNodeLayoutExample.vue';
+// import ClassicSelectionController from '@/common/treeView/classicSelectionController';
+// import TreeViewNodeLayoutExample from './TreeViewNodeLayoutExample.vue';
 import TreeViewNodeCheckMarkExample from './TreeViewNodeCheckMarkExample.vue';
 
 export interface Props {
-  referenceDescription?: RefDescription;
+  referenceDescription: RefDescription;
 }
 
 const emit = defineEmits<{
@@ -49,7 +44,7 @@ const props = defineProps<Props>();
 
 const { referenceDescription } = toRefs(props);
 
-const dataProvider = ref<LocationTreeViewDataProvider | undefined>();
+const dataProvider = ref<LocationTreeViewDataProvider>(new LocationTreeViewDataProvider(referenceDescription.value));
 const selectionController = ref<TreeViewSelectionController | undefined>();
 
 watch(
@@ -73,6 +68,10 @@ watch(
   { immediate: true }
 );
 
+function getLocationNodeKey(node: TreeItem): any {
+  return (node as LocationNode).id
+}
+
 function labelAscComparer(a: TreeItem, b: TreeItem): number {
   if (a.label < b.label) {
     return -1;
@@ -83,6 +82,8 @@ function labelAscComparer(a: TreeItem, b: TreeItem): number {
   return 0;
 }
 
+
+// @ts-ignore unused
 function invert(comparer: TreeItemComparer) {
   return (a: TreeItem, b: TreeItem) => {
     return -comparer(a, b);
@@ -122,15 +123,18 @@ function clearSelection() {
     flex: 1 1 0;
   }
 }
+
 .tree-view {
   font-family: monospace;
   height: 100%;
   overflow-y: auto;
 }
+
 @mixin control {
   cursor: pointer;
   user-select: none;
 }
+
 .ltv-expansion {
   @include control();
 }
