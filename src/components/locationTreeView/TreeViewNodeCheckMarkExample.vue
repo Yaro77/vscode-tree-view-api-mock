@@ -8,9 +8,8 @@
 </template>
 
 <script lang="ts" setup>
-import { TreeItem, SelectionState, Selectable } from '@/common/treeView/types';
+import { TreeItem, SelectionState, Selectable, SelectionStateSlotProps } from '@/common/treeView/types';
 import { computed } from 'vue';
-import { SelectionStateSlotProps } from "@/common/treeView/TreeViewNode.vue"
 
 export interface Props extends SelectionStateSlotProps {
 }

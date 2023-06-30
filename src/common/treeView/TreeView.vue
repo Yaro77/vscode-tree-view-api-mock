@@ -30,13 +30,16 @@ import {
   TreeViewDataProvider,
   TreeViewSelectionController,
   TreeItemComparer,
+  DefaultSlotProps,
+  CollapsibleStateSlotProps,
+  SelectionStateSlotProps,
 } from './types';
 import {
   DataProviderKey,
   SelectionControllerKey,
   TreeItemComparerKey,
 } from "./constants"
-import TreeViewNode, { DefaultSlotProps, CollapsibleStateSlotProps, SelectionStateSlotProps } from './TreeViewNode.vue';
+import TreeViewNode from './TreeViewNode.vue';
 
 export interface Props {
   dataProvider: TreeViewDataProvider<any>;

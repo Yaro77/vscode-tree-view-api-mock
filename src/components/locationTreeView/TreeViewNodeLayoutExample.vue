@@ -15,8 +15,7 @@
 
 <script lang="ts" setup>
 import FlagIcon from "@/common/icons/FlagIcon.vue";
-import { CollapsibleState, SelectionState, Selectable } from '@/common/treeView/types';
-import { DefaultSlotProps } from "@/common/treeView/TreeViewNode.vue"
+import { CollapsibleState, SelectionState, Selectable, DefaultSlotProps } from '@/common/treeView/types';
 import { LocationNode, LocationNodeType } from './dataProvider';
 import { computed } from "vue";
 

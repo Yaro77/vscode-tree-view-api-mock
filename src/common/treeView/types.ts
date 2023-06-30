@@ -48,3 +48,23 @@ export abstract class TreeViewSelectionController<
 export interface TreeItemComparer {
   (a: TreeItem, b: TreeItem): number;
 }
+
+export interface DefaultSlotProps {
+  item: TreeItem
+  expand: () => void
+  collapse: () => void
+  select: (event?: Event) => void
+  deselect: (event?: Event) => void
+}
+
+export interface CollapsibleStateSlotProps {
+  item: TreeItem
+  expand: () => void
+  collapse: () => void
+}
+
+export interface SelectionStateSlotProps {
+  item: TreeItem
+  select: (event?: Event) => void
+  deselect: (event?: Event) => void
+}

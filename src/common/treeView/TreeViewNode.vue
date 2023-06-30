@@ -42,6 +42,9 @@ import {
 import {
   TreeItem,
   CollapsibleState,
+  DefaultSlotProps,
+  CollapsibleStateSlotProps,
+  SelectionStateSlotProps,
 } from './types';
 import {
   DataProviderKey,
@@ -55,25 +58,6 @@ export interface Props {
   getKey: (node: TreeItem) => any;
 }
 
-export interface DefaultSlotProps {
-  item: TreeItem
-  expand: () => void
-  collapse: () => void
-  select: (event?: Event) => void
-  deselect: (event?: Event) => void
-}
-
-export interface CollapsibleStateSlotProps {
-  item: TreeItem
-  expand: () => void
-  collapse: () => void
-}
-
-export interface SelectionStateSlotProps {
-  item: TreeItem
-  select: (event?: Event) => void
-  deselect: (event?: Event) => void
-}
 
 const props = defineProps<Props>();
 
