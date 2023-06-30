@@ -10,11 +10,9 @@
 <script lang="ts" setup>
 import { TreeItem, SelectionState, Selectable } from '@/common/treeView/types';
 import { computed } from 'vue';
+import { SelectionStateSlotProps } from "@/common/treeView/TreeViewNode.vue"
 
-export interface Props {
-  item: TreeItem
-  select: (event?: Event) => void
-  deselect: (event?: Event) => void
+export interface Props extends SelectionStateSlotProps {
 }
 
 const { item } = defineProps<Props>();

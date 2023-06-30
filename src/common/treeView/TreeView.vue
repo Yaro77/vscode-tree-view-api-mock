@@ -36,7 +36,7 @@ import {
   SelectionControllerKey,
   TreeItemComparerKey,
 } from "./constants"
-import TreeViewNode from './TreeViewNode.vue';
+import TreeViewNode, { DefaultSlotProps, CollapsibleStateSlotProps, SelectionStateSlotProps } from './TreeViewNode.vue';
 
 export interface Props {
   dataProvider: TreeViewDataProvider<any>;
@@ -46,6 +46,16 @@ export interface Props {
 }
 
 const props = defineProps<Props>();
+
+
+defineSlots<{
+  node(props: DefaultSlotProps): any
+  ["empty-tree"](props: {}): any
+  ["node-label"](props: DefaultSlotProps): any
+  ["node-collapsible-state"](props: CollapsibleStateSlotProps): any
+  ["node-selection-state"](props: SelectionStateSlotProps): any
+}>()
+
 
 const { dataProvider, selectionController, nodeComparer } =
   toRefs(props);

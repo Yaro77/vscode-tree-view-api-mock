@@ -13,19 +13,18 @@
       </slot>
     </div>
     <ul v-if="item.collapsibleState === CollapsibleState.Expanded">
-      <TreeViewNode ref="childNodes" v-for="child in       children       " :item="child" :get-key="getKey"
-        :key="getKey(child)">
-        <template v-slot:default="defaultSlot : DefaultSlot">
-          <slot v-bind=" defaultSlot " />
+      <TreeViewNode ref="childNodes" v-for="child in children" :item="child" :get-key="getKey" :key="getKey(child)">
+        <template v-slot:default="defaultSlot">
+          <slot v-bind="defaultSlot" />
         </template>
-        <template v-slot:collapsible-state=" collapsibleStateSlot: CollapsibleStateSlot ">
-          <slot name="collapsible-state" v-bind=" collapsibleStateSlot " />
+        <template v-slot:collapsible-state="collapsibleStateSlot">
+          <slot name="collapsible-state" v-bind="collapsibleStateSlot" />
         </template>
-        <template v-slot:selection-state=" selectionStateSlot: SelectionStateSlot ">
-          <slot name="selection-state" v-bind=" selectionStateSlot " />
+        <template v-slot:selection-state="selectionStateSlot">
+          <slot name="selection-state" v-bind="selectionStateSlot" />
         </template>
-        <template v-slot:label=" labelSlot: DefaultSlot ">
-          <slot name="label" v-bind=" labelSlot " />
+        <template v-slot:label="labelSlot">
+          <slot name="label" v-bind="labelSlot" />
         </template>
       </TreeViewNode>
     </ul>
@@ -51,32 +50,40 @@ import {
 } from "./constants"
 import DefaultExpansion from './TreeViewNodeExpansion.vue';
 
-export interface CollapsibleStateSlot {
-  item: TreeItem
-  expand: () => void
-  collapse: () => void
-}
-
-export interface SelectionStateSlot {
-  item: TreeItem
-  select: (event?: Event) => void
-  deselect: (event?: Event) => void
-}
-
-export interface DefaultSlot {
-  item: TreeItem
-  expand: () => void
-  collapse: () => void
-  select: (event?: Event) => void
-  deselect: (event?: Event) => void
-}
-
 export interface Props {
   item: TreeItem;
   getKey: (node: TreeItem) => any;
 }
 
+export interface DefaultSlotProps {
+  item: TreeItem
+  expand: () => void
+  collapse: () => void
+  select: (event?: Event) => void
+  deselect: (event?: Event) => void
+}
+
+export interface CollapsibleStateSlotProps {
+  item: TreeItem
+  expand: () => void
+  collapse: () => void
+}
+
+export interface SelectionStateSlotProps {
+  item: TreeItem
+  select: (event?: Event) => void
+  deselect: (event?: Event) => void
+}
+
 const props = defineProps<Props>();
+
+defineSlots<{
+  default(props: DefaultSlotProps): any
+  label(props: DefaultSlotProps): any
+  ["collapsible-state"](props: CollapsibleStateSlotProps): any
+  ["selection-state"](props: SelectionStateSlotProps): any
+}>()
+
 const { item } = toRefs(props);
 const childNodes = ref();
 

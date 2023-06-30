@@ -15,16 +15,12 @@
 
 <script lang="ts" setup>
 import FlagIcon from "@/common/icons/FlagIcon.vue";
-import { CollapsibleState, SelectionState, Selectable, TreeItem } from '@/common/treeView/types';
+import { CollapsibleState, SelectionState, Selectable } from '@/common/treeView/types';
+import { DefaultSlotProps } from "@/common/treeView/TreeViewNode.vue"
 import { LocationNode, LocationNodeType } from './dataProvider';
 import { computed } from "vue";
 
-export interface Props {
-  item: TreeItem;
-  select: (e: Event) => void;
-  deselect: (e: Event) => void;
-  expand: () => void;
-  collapse: () => void;
+export interface Props extends DefaultSlotProps {
 }
 
 const { item } = defineProps<Props>();
