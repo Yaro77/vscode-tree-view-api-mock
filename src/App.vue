@@ -1,9 +1,6 @@
 <template>
   <div class="layout">
-    <LocationTreeView
-      :reference-description="rd"
-      @selection-changed="onSelectionChanged"
-    />
+    <LocationTreeView :reference-description="rd" @selection-changed="onSelectionChanged" />
     <div class="layout__selection">
       <div>
         <button @click="clearSelectionEvents">Clear</button>
@@ -43,9 +40,13 @@ function clearSelectionEvents() {
   position: absolute;
   inset: 0;
   display: flex;
-  flex-flow: row nowrap;
+  flex-flow: column nowrap;
 
-  > * {
+  @media (min-width: 500px) {
+    flex-direction: row;
+  }
+
+  >* {
     flex: 0 0 50%;
   }
 }
@@ -68,7 +69,6 @@ function clearSelectionEvents() {
 ul {
   margin: 0;
   overflow-y: auto;
-  color: #242424;
   font-size: 0.8rem;
 }
 </style>
