@@ -10,11 +10,19 @@ export enum SelectionState {
   Intermediate,
 }
 
-export class TreeItem {
+export abstract class TreeItem {
+  label: string
+  collapsibleState: CollapsibleState
+  selectionState: SelectionState
+
   constructor(
-    public label: string,
-    public collapsibleState: CollapsibleState
-  ) { }
+    label: string,
+    collapsibleState: CollapsibleState
+  ) {
+    this.label = label
+    this.collapsibleState = collapsibleState
+    this.selectionState = SelectionState.Unselected
+  }
 }
 
 export abstract class TreeViewDataProvider<T = any> {
@@ -22,26 +30,21 @@ export abstract class TreeViewDataProvider<T = any> {
   abstract getTreeItem(element: T): TreeItem;
   abstract getParent?(element: T): T | undefined;
   abstract resolveTreeItem?(treeItem: TreeItem, element: T): TreeItem;
+  abstract getData(treeItem: TreeItem): T
 }
-
-export interface SelectableEntity {
-  selectionState: SelectionState;
-}
-
-export type Selectable<T> = T & SelectableEntity;
 
 export abstract class TreeViewSelectionController<
-  T extends TreeItem = TreeItem,
-  S extends Selectable<T> = Selectable<T>
+  I extends TreeItem = TreeItem
 > {
   abstract get onSelectionDidChange(): EventTarget;
 
-  abstract getSelectable(item: T): S;
+  abstract select(item: I, event?: Event): void;
+  abstract deselect(item: I, event?: Event): void;
 
-  abstract select(item: T, event?: Event): void;
-  abstract deselect(item: T, event?: Event): void;
+  abstract canSelect(item: I): boolean
+  abstract canDeselect(item: I): boolean
 
-  abstract getSelectedItems(): T[];
+  abstract getSelectedItems(): I[];
   abstract clear(): void;
 }
 

@@ -6,11 +6,9 @@ import {
   SelectionState,
 } from './types';
 
-import type { Selectable } from './types';
-
 export default class extends TreeViewSelectionController<TreeItem> {
   private selectionDidChangeEventTarget: EventTarget = new EventTarget();
-  private selectedItems: TreeItem[] = [];
+  private selectedItems: any[] = [];
 
   constructor(private dataProvider: TreeViewDataProvider) {
     super();
@@ -18,14 +16,6 @@ export default class extends TreeViewSelectionController<TreeItem> {
 
   get onSelectionDidChange(): EventTarget {
     return this.selectionDidChangeEventTarget;
-  }
-
-  getSelectable(item: TreeItem): Selectable<TreeItem> {
-    const selectable = item as Selectable<TreeItem>;
-    if (selectable.selectionState === undefined) {
-      selectable.selectionState = SelectionState.Unselected;
-    }
-    return selectable;
   }
 
   select(item: TreeItem): void {
@@ -42,79 +32,70 @@ export default class extends TreeViewSelectionController<TreeItem> {
   }
 
   private selectInternal(item: TreeItem): void {
-    const selectable = this.getSelectable(item);
-    const selectDown = (item: Selectable<TreeItem>) => {
-      const children = this.getChildren(item).map((it: TreeItem) =>
-        this.getSelectable(it)
-      );
-      children.forEach((child: Selectable<TreeItem>) => {
+
+    const selectDown = (it: TreeItem) => {
+      const children = this.getChildren(it)
+      children.forEach((child: TreeItem) => {
         child.selectionState = SelectionState.Selected;
         selectDown(child);
       });
     };
 
-    const selectUp = (item: Selectable<TreeItem>) => {
-      const parent = this.getParent(item);
+    const selectUp = (it: TreeItem) => {
+      const parent = this.getParent(it);
       if (parent) {
         const allSelected = this.getChildren(parent).every(
-          (it: TreeItem) =>
-            this.getSelectable(it).selectionState === SelectionState.Selected
+          (it: TreeItem) => it.selectionState === SelectionState.Selected
         );
-        const selectableParent = this.getSelectable(parent);
         if (allSelected) {
-          selectableParent.selectionState = SelectionState.Selected;
+          parent.selectionState = SelectionState.Selected;
         } else {
-          selectableParent.selectionState = SelectionState.Intermediate;
+          parent.selectionState = SelectionState.Intermediate;
         }
-        selectUp(selectableParent);
+        selectUp(parent);
       }
     };
 
-    selectable.selectionState = SelectionState.Selected;
-    selectDown(selectable);
-    selectUp(selectable);
+    item.selectionState = SelectionState.Selected;
+    selectDown(item);
+    selectUp(item);
   }
 
   private deselectInternal(item: TreeItem): void {
-    const selectable = this.getSelectable(item);
 
-    const deselectDown = (item: Selectable<TreeItem>) => {
-      const children = this.getChildren(item).map((it: TreeItem) =>
-        this.getSelectable(it)
-      );
-      children.forEach((child: Selectable<TreeItem>) => {
+    const deselectDown = (it: TreeItem) => {
+      const children = this.getChildren(it)
+      children.forEach((child: TreeItem) => {
         child.selectionState = SelectionState.Unselected;
         deselectDown(child);
       });
     };
 
-    const deselectUp = (item: Selectable<TreeItem>) => {
-      const parent = this.getParent(item);
+    const deselectUp = (it: TreeItem) => {
+      const parent = this.getParent(it);
       if (parent) {
         const allUnselected = this.getChildren(parent).every(
-          (it) =>
-            this.getSelectable(it).selectionState === SelectionState.Unselected
+          (x) => x.selectionState === SelectionState.Unselected
         );
-        const selectableParent = this.getSelectable(parent);
         if (allUnselected) {
-          selectableParent.selectionState = SelectionState.Unselected;
+          parent.selectionState = SelectionState.Unselected;
         } else {
-          selectableParent.selectionState = SelectionState.Intermediate;
+          parent.selectionState = SelectionState.Intermediate;
         }
-        deselectUp(selectableParent);
+        deselectUp(parent);
       }
     };
 
-    selectable.selectionState = SelectionState.Unselected;
-    deselectDown(selectable);
-    deselectUp(selectable);
+    item.selectionState = SelectionState.Unselected;
+    deselectDown(item);
+    deselectUp(item);
   }
 
-  getSelectedItems(): TreeItem[] {
+  getSelectedItems(): any[] {
     return this.selectedItems;
   }
 
-  private fireSelectionDidChange(selectedItems: TreeItem[]) {
+  private fireSelectionDidChange(selectedItems: any[]) {
     this.onSelectionDidChange.dispatchEvent(
       new CustomEvent('change', {
         detail: selectedItems.map((it) => toRaw(it)),
@@ -122,16 +103,14 @@ export default class extends TreeViewSelectionController<TreeItem> {
     );
   }
 
-  private getSelectedItemsInternal(): TreeItem[] {
-    const ret = [] as TreeItem[];
+  private getSelectedItemsInternal(): any[] {
+    const ret = [] as any[];
 
-    const searchSelected = (item?: TreeItem) => {
-      const children = this.getChildren(item).map((it: TreeItem) =>
-        this.getSelectable(it)
-      );
+    const searchSelected = (it?: TreeItem) => {
+      const children = this.getChildren(it)
       for (const it of children) {
         if (it.selectionState === SelectionState.Selected) {
-          ret.push(it);
+          ret.push(this.dataProvider.getData(it));
         } else if (it.selectionState === SelectionState.Intermediate) {
           searchSelected(it);
         }
@@ -145,21 +124,32 @@ export default class extends TreeViewSelectionController<TreeItem> {
 
   clear(): void {
     const rootItems = this.getChildren();
-    rootItems.forEach((item) => this.deselectInternal(item));
+    rootItems.forEach((it: any) => {
+      const item = this.dataProvider.getTreeItem(it)
+      this.deselectInternal(item);
+    });
 
-    this.selectedItems = this.getSelectedItemsInternal();
+    this.selectedItems = []; // = this.getSelectedItemsInternal();
     this.fireSelectionDidChange(this.selectedItems);
   }
 
-  private getChildren(item?: TreeItem): TreeItem[] {
+  canSelect(): boolean {
+    return true
+  }
+
+  canDeselect(): boolean {
+    return true
+  }
+
+  private getChildren(it?: TreeItem): TreeItem[] {
     return this.dataProvider
-      .getChildren(item)
-      .map((child: TreeItem) => this.dataProvider.getTreeItem(child));
+      .getChildren(!!it ? this.dataProvider.getData(it) : undefined)
+      .map((n: any) => this.dataProvider.getTreeItem(n));
   }
 
   private getParent(it: TreeItem): TreeItem | undefined {
     if (this.dataProvider.getParent) {
-      const p = this.dataProvider.getParent(it);
+      const p = this.dataProvider.getParent(this.dataProvider.getData(it));
       if (p) {
         return this.dataProvider.getTreeItem(p);
       }

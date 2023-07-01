@@ -3,7 +3,7 @@ import { TreeViewDataProvider, TreeViewSelectionController, TreeItemComparer } f
 
 
 export const DataProviderKey = Symbol() as InjectionKey<
-  Ref<TreeViewDataProvider<any>>
+  Ref<TreeViewDataProvider<any> | undefined>
 >;
 
 export const SelectionControllerKey = Symbol() as InjectionKey<

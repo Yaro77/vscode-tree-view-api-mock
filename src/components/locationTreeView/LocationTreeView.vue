@@ -4,12 +4,12 @@
     <TreeView :data-provider="dataProvider" :selection-controller="selectionController" :node-comparer="labelAscComparer"
       :get-key="getLocationNodeKey">
       <template v-slot:empty-tree>No locations</template>
-      <!-- <template v-slot:node="nodeObj">
+      <template v-slot:node="nodeObj">
         <TreeViewNodeLayoutExample v-bind="nodeObj" />
-      </template> -->
-      <template v-slot:node-selection-state="selectionStateObj">
-        <TreeViewNodeCheckMarkExample v-bind="selectionStateObj" />
       </template>
+      <!-- <template v-slot:node-selection-state="selectionStateObj">
+        <TreeViewNodeCheckMarkExample v-bind="selectionStateObj" />
+      </template> -->
     </TreeView>
   </div>
 </template>
@@ -27,10 +27,10 @@ import {
   LocationTreeViewDataProvider,
   LocationNode,
 } from './dataProvider';
-import SubtreeSelectionController from '@/common/treeView/subtreeSelectionController';
-// import ClassicSelectionController from '@/common/treeView/classicSelectionController';
-// import TreeViewNodeLayoutExample from './TreeViewNodeLayoutExample.vue';
-import TreeViewNodeCheckMarkExample from './TreeViewNodeCheckMarkExample.vue';
+// import SubtreeSelectionController from '@/common/treeView/subtreeSelectionController';
+import ClassicSelectionController from '@/common/treeView/classicSelectionController';
+import TreeViewNodeLayoutExample from './TreeViewNodeLayoutExample.vue';
+// import TreeViewNodeCheckMarkExample from './TreeViewNodeCheckMarkExample.vue';
 
 export interface Props {
   referenceDescription: RefDescription;
@@ -59,8 +59,8 @@ watch(
     }
     if (!!rd) {
       dataProvider.value = new LocationTreeViewDataProvider(rd);
-      sc = new SubtreeSelectionController(dataProvider.value);
-      // sc = new ClassicSelectionController();
+      // sc = new SubtreeSelectionController(dataProvider.value);
+      sc = new ClassicSelectionController(dataProvider.value);
       sc.onSelectionDidChange.addEventListener('change', onSelectionDidChange);
       selectionController.value = sc;
     }

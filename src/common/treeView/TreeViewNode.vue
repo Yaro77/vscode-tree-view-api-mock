@@ -38,6 +38,7 @@ import {
   toRefs,
   onBeforeUnmount,
   watch,
+  toValue,
 } from 'vue';
 import {
   TreeItem,
@@ -106,23 +107,21 @@ function collapse() {
 }
 
 function expand() {
-  if (item.value.collapsibleState === CollapsibleState.None) {
+  const it = toValue(item)
+  const dp = toValue(dataProvider)
+  if (it.collapsibleState === CollapsibleState.None) {
     return;
   }
   if (children.value === undefined) {
-    let ch = dataProvider.value
-      .getChildren(item.value)
-      .map((child) => dataProvider.value.getTreeItem(child));
-
-    if (nodeComparer && nodeComparer.value) {
-      ch.sort(nodeComparer.value);
+    let ch = [] as TreeItem[]
+    if (dp) {
+      ch = dp.getChildren(dp.getData(it))
+        .map((n: any) => dp.getTreeItem(n));
     }
 
-    if (selectionController && selectionController.value) {
-      const sc = selectionController.value
-      ch = children.value = ch.map((c) =>
-        sc.getSelectable(c)
-      );
+    const comparer = toValue(nodeComparer)
+    if (comparer) {
+      ch.sort(comparer);
     }
 
     children.value = ch;
@@ -131,21 +130,19 @@ function expand() {
 }
 
 function select(event?: Event) {
-  const sc = selectionController?.value;
-  if (!sc) {
-    return;
+  const it = toValue(item)
+  const sc = toValue(selectionController);
+  if (!!sc && sc.canSelect(it)) {
+    sc.select(it, event);
   }
-
-  sc.select(item.value, event);
 }
 
 function deselect(event?: Event) {
-  const sc = selectionController?.value;
-  if (!sc) {
-    return;
+  const it = toValue(item)
+  const sc = toValue(selectionController);
+  if (!!sc && sc.canDeselect(it)) {
+    sc.deselect(it, event);
   }
-
-  sc.deselect(item.value, event);
 }
 </script>
 

@@ -53,6 +53,9 @@ export class LocationTreeViewDataProvider extends TreeViewDataProvider<LocationN
     return treeItem;
   }
 
+  getData(treeItem: TreeItem): LocationNode {
+    return treeItem as LocationNode
+  }
 
   getChildren(element?: LocationNode): LocationNode[] {
     if (element) {

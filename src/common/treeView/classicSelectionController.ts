@@ -1,22 +1,16 @@
 import { toRaw } from 'vue';
-import { TreeViewSelectionController, TreeItem, SelectionState } from './types';
-
-import type { Selectable } from './types';
+import { TreeViewSelectionController, TreeItem, SelectionState, TreeViewDataProvider } from './types';
 
 export default class extends TreeViewSelectionController<TreeItem> {
   private selectionDidChangeEventTarget: EventTarget = new EventTarget();
-  private selectedItems: Set<TreeItem> = new Set();
+  private selectedItems: Set<any> = new Set();
+
+  constructor(private dataProvider: TreeViewDataProvider) {
+    super()
+  }
 
   get onSelectionDidChange(): EventTarget {
     return this.selectionDidChangeEventTarget;
-  }
-
-  getSelectable(item: TreeItem): Selectable<TreeItem> {
-    const selectable = item as Selectable<TreeItem>;
-    if (selectable.selectionState === undefined) {
-      selectable.selectionState = SelectionState.Unselected;
-    }
-    return selectable;
   }
 
   select(item: TreeItem, event?: Event): void {
@@ -52,17 +46,13 @@ export default class extends TreeViewSelectionController<TreeItem> {
   }
 
   private selectInternal(item: TreeItem): void {
-    const selectable = this.getSelectable(item);
-
-    selectable.selectionState = SelectionState.Selected;
-    this.selectedItems.add(item);
+    item.selectionState = SelectionState.Selected;
+    this.selectedItems.add(this.dataProvider.getData(item));
   }
 
   private deselectInternal(item: TreeItem): void {
-    const selectable = this.getSelectable(item);
-
-    selectable.selectionState = SelectionState.Unselected;
-    this.selectedItems.delete(item);
+    item.selectionState = SelectionState.Unselected;
+    this.selectedItems.delete(this.dataProvider.getData(item));
   }
 
   getSelectedItems(): TreeItem[] {
@@ -70,10 +60,10 @@ export default class extends TreeViewSelectionController<TreeItem> {
   }
 
   private isSelected(item: TreeItem): boolean {
-    return this.selectedItems.has(item);
+    return this.selectedItems.has(this.dataProvider.getData(item));
   }
 
-  private fireSelectionDidChange(selectedItems: TreeItem[]) {
+  private fireSelectionDidChange(selectedItems: any[]) {
     this.onSelectionDidChange.dispatchEvent(
       new CustomEvent('change', {
         detail: selectedItems.map((it) => toRaw(it)),
@@ -87,8 +77,19 @@ export default class extends TreeViewSelectionController<TreeItem> {
     this.fireSelectionDidChange([...this.selectedItems]);
   }
 
+  canSelect(): boolean {
+    return true
+  }
+
+  canDeselect(): boolean {
+    return true
+  }
+
   private clearInternal(): void {
     const selected = [...this.selectedItems];
-    selected.forEach((item: TreeItem) => this.deselectInternal(item));
+    selected.forEach((it: any) => {
+      const treeItem = this.dataProvider.getTreeItem(it)
+      this.deselectInternal(treeItem)
+    });
   }
 }

@@ -23,7 +23,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, toRefs, watch, computed, provide } from 'vue';
+import { ref, watch, computed, provide, toValue, shallowRef } from 'vue';
 import { } from 'vue';
 import {
   TreeItem,
@@ -42,9 +42,9 @@ import {
 import TreeViewNode from './TreeViewNode.vue';
 
 export interface Props {
-  dataProvider: TreeViewDataProvider<any>;
-  selectionController: TreeViewSelectionController<any> | undefined;
-  nodeComparer: TreeItemComparer | undefined;
+  dataProvider?: TreeViewDataProvider<any>;
+  selectionController?: TreeViewSelectionController<any>;
+  nodeComparer?: TreeItemComparer;
   getKey: (item: TreeItem) => any;
 }
 
@@ -60,8 +60,9 @@ defineSlots<{
 }>()
 
 
-const { dataProvider, selectionController, nodeComparer } =
-  toRefs(props);
+const nodeComparer = ref(props.nodeComparer)!
+const dataProvider = shallowRef(props.dataProvider)!
+const selectionController = shallowRef(props.selectionController)!
 const rootNodes = ref<TreeItem[]>([]);
 
 provide(DataProviderKey, dataProvider);
@@ -69,19 +70,17 @@ provide(SelectionControllerKey, selectionController);
 provide(TreeItemComparerKey, nodeComparer);
 
 watch(
-  dataProvider,
-  (provider) => {
-    if (!provider) {
+  dataProvider!,
+  (dp) => {
+    if (!dp) {
       rootNodes.value = [];
       return;
     }
-    const roots = provider.getChildren();
-    let nodes = roots.map((n: any) => provider.getTreeItem(n));
-    if (nodeComparer.value) {
-      nodes.sort(nodeComparer.value);
-    }
-    if (selectionController.value) {
-      nodes = nodes.map((n) => selectionController.value!.getSelectable(n));
+    const roots = dp.getChildren();
+    let nodes = roots.map((n: any) => dp.getTreeItem(n));
+    const comparer = toValue(nodeComparer)
+    if (comparer) {
+      nodes.sort(comparer);
     }
     rootNodes.value = nodes;
   },
