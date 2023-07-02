@@ -2,7 +2,7 @@
   <div class="tree-view">
     <slot v-if="isEmptyTree" name="empty-tree" />
     <ul v-else>
-      <TreeViewNode v-for="node in rootNodes" :key="getKey(node)" :get-key="getKey" :item="node">
+      <TreeViewNode ref="vnChildren" v-for="node in rootNodes" :key="getKey(node)" :get-key="getKey" :item="node">
         <template v-slot:default="defaultSlot">
           <slot name="node" v-bind="defaultSlot" />
         </template>
@@ -23,7 +23,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, computed, provide, toValue, shallowRef } from 'vue';
+import { ref, watch, computed, provide, toValue, shallowRef, toRaw } from 'vue';
 import { } from 'vue';
 import {
   TreeItem,
@@ -64,6 +64,11 @@ const nodeComparer = ref(props.nodeComparer)!
 const dataProvider = shallowRef(props.dataProvider)!
 const selectionController = shallowRef(props.selectionController)!
 const rootNodes = ref<TreeItem[]>([]);
+const vnChildren = ref<InstanceType<typeof TreeViewNode>[]>([])
+
+defineExpose({
+  reveal,
+})
 
 provide(DataProviderKey, dataProvider);
 provide(SelectionControllerKey, selectionController);
@@ -88,6 +93,38 @@ watch(
 );
 
 const isEmptyTree = computed<boolean>(() => rootNodes.value.length === 0);
+
+async function reveal(element: any) {
+  const dp = toValue(dataProvider)
+  if (!dp || !dp.getParent) {
+    return
+  }
+
+  const subtree = [] as TreeItem[]
+  let parent = element
+  while (parent) {
+    const it = dp.getTreeItem(parent)
+    if (it) {
+      subtree.unshift(it)
+    }
+
+    parent = dp.getParent(parent)
+  }
+
+  let vn = vnChildren.value
+  const lastItem = subtree[subtree.length - 1]
+  for (const item of subtree) {
+    for (const node of vn) {
+      const deeperNodes = await node.expandNode(item, toRaw(item) === toRaw(lastItem))
+
+      if (deeperNodes && deeperNodes.length > 0) {
+        vn = deeperNodes
+        break
+      }
+    }
+  }
+}
+
 </script>
 
 <style lang="scss" scoped>

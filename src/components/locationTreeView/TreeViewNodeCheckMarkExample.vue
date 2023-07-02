@@ -1,22 +1,19 @@
 <template>
-  <span v-if="selectableItem.selectionState === SelectionState.Unselected" @click="select" class="selection">[ ]
+  <span v-if="item.selectionState === SelectionState.Unselected" @click="select" class="selection">[ ]
   </span>
-  <span v-if="selectableItem.selectionState === SelectionState.Selected" @click="deselect" class="selection">[✔]
+  <span v-if="item.selectionState === SelectionState.Selected" @click="deselect" class="selection">[✔]
   </span>
-  <span v-if="selectableItem.selectionState === SelectionState.Intermediate" @click="select" class="selection">[▪]
+  <span v-if="item.selectionState === SelectionState.Intermediate" @click="select" class="selection">[▪]
   </span>
 </template>
 
 <script lang="ts" setup>
-import { TreeItem, SelectionState, Selectable, SelectionStateSlotProps } from '@/common/treeView/types';
-import { computed } from 'vue';
+import { SelectionState, SelectionStateSlotProps } from '@/common/treeView/types';
 
 export interface Props extends SelectionStateSlotProps {
 }
 
-const { item } = defineProps<Props>();
-
-const selectableItem = computed(() => item as Selectable<TreeItem>)
+defineProps<Props>();
 </script>
 
 <style lang="scss" scoped>

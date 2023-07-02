@@ -5,8 +5,8 @@
     <span v-if="item.collapsibleState === CollapsibleState.Expanded" @click="collapse" class="ltv-expansion">▾
     </span>
     <span v-if="item.collapsibleState === CollapsibleState.None">&nbsp;</span>
-    <FlagIcon v-if="selectableItem.type === LocationNodeType.Location" width="16" height="16" />
-    <span v-if="selectableItem.selectionState === SelectionState.Selected" @click="deselect" class="label">
+    <FlagIcon v-if="isLocation" width="16" height="16" />
+    <span v-if="item.selectionState === SelectionState.Selected" @click="deselect" class="label">
       [{{ item.label }}]
     </span>
     <span v-else @click="select" class="label">{{ item.label }}</span>
@@ -14,17 +14,18 @@
 </template>
 
 <script lang="ts" setup>
+import { computed, toRefs } from "vue"
 import FlagIcon from "@/common/icons/FlagIcon.vue";
-import { CollapsibleState, SelectionState, Selectable, DefaultSlotProps } from '@/common/treeView/types';
+import { CollapsibleState, SelectionState, DefaultSlotProps } from '@/common/treeView/types';
 import { LocationNode, LocationNodeType } from './dataProvider';
-import { computed } from "vue";
 
 export interface Props extends DefaultSlotProps {
 }
 
-const { item } = defineProps<Props>();
+const props = defineProps<Props>();
+const { item } = toRefs(props)
 
-const selectableItem = computed(() => item as Selectable<LocationNode>)
+const isLocation = computed(() => (item.value as LocationNode).type === LocationNodeType.Location)
 </script>
 
 <style lang="scss" scoped>

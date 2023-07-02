@@ -13,7 +13,11 @@ export default class extends TreeViewSelectionController<TreeItem> {
     return this.selectionDidChangeEventTarget;
   }
 
-  select(item: TreeItem, event?: Event): void {
+  select(items: TreeItem[], event?: Event): void {
+    if (items.length === 0) {
+      return
+    }
+    const item = items[0]
     if (event && event instanceof PointerEvent) {
       const pe = event as PointerEvent;
       if (pe.shiftKey) {
@@ -29,9 +33,11 @@ export default class extends TreeViewSelectionController<TreeItem> {
         }
         this.fireSelectionDidChange([...this.selectedItems]);
       } else {
-        this.clearInternal();
-        this.selectInternal(item);
-        this.fireSelectionDidChange([...this.selectedItems]);
+        if (!(this.isSelected(item) && this.selectedItems.size === 1)) {
+          this.clear(true);
+          this.selectInternal(item);
+          this.fireSelectionDidChange([...this.selectedItems]);
+        }
       }
     } else {
       if (!this.isSelected(item)) {
@@ -41,8 +47,8 @@ export default class extends TreeViewSelectionController<TreeItem> {
     }
   }
 
-  deselect(item: TreeItem, event?: Event): void {
-    this.select(item, event);
+  deselect(items: TreeItem[], event?: Event): void {
+    this.select(items, event);
   }
 
   private selectInternal(item: TreeItem): void {
@@ -71,25 +77,15 @@ export default class extends TreeViewSelectionController<TreeItem> {
     );
   }
 
-  clear(): void {
-    this.clearInternal();
-
-    this.fireSelectionDidChange([...this.selectedItems]);
-  }
-
-  canSelect(): boolean {
-    return true
-  }
-
-  canDeselect(): boolean {
-    return true
-  }
-
-  private clearInternal(): void {
+  clear(suspendSelectionDidChange?: boolean): void {
     const selected = [...this.selectedItems];
     selected.forEach((it: any) => {
       const treeItem = this.dataProvider.getTreeItem(it)
       this.deselectInternal(treeItem)
     });
+
+    if (!suspendSelectionDidChange) {
+      this.fireSelectionDidChange([...this.selectedItems]);
+    }
   }
 }

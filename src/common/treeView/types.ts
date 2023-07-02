@@ -38,14 +38,11 @@ export abstract class TreeViewSelectionController<
 > {
   abstract get onSelectionDidChange(): EventTarget;
 
-  abstract select(item: I, event?: Event): void;
-  abstract deselect(item: I, event?: Event): void;
-
-  abstract canSelect(item: I): boolean
-  abstract canDeselect(item: I): boolean
+  abstract select(items: I[], event?: Event): void;
+  abstract deselect(items: I[], event?: Event): void;
 
   abstract getSelectedItems(): I[];
-  abstract clear(): void;
+  abstract clear(suspendSelectionDidChange?: boolean): void;
 }
 
 export interface TreeItemComparer {

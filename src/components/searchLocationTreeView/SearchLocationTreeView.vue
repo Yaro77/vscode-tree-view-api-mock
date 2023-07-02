@@ -9,22 +9,42 @@
 <script setup lang="ts" >
 import TreeView from "@/common/treeView/TreeView.vue"
 import TreeViewNodeCheckMarkExample from "../locationTreeView/TreeViewNodeCheckMarkExample.vue";
-import { Props, SearchTreeItem } from "./types"
-import { ref, shallowRef, watch } from "vue";
+import { ISearchNode, Props, SearchTreeItem } from "./types"
+import { ref, shallowRef, toValue, watch } from "vue";
 import { TreeItem, TreeViewDataProvider, TreeViewSelectionController } from "@/common/treeView/types";
 import DataProvider from "./dataProvider";
 import SubtreeSelectionController from "@/common/treeView/subtreeSelectionController";
 // import ClassicSelectionController from "@/common/treeView/classicSelectionController";
 
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), {
+  selectedLocations: () => ([])
+})
 const shallowResponse = shallowRef(props.response)
 
 const dataProvider = ref<TreeViewDataProvider>()
 const selectionController = ref<TreeViewSelectionController>()
 
+const localSelectedLocations = ref<ISearchNode[]>([])
+
 const emit = defineEmits<{
-  'selection-changed': [selection: any[]];
+  'update:selected-locations': [selection: ISearchNode[]];
 }>();
+
+watch(() => props.selectedLocations, (selected) => {
+  if (!isSelectedLocationsChanged(selected ?? [], localSelectedLocations.value)) {
+    return
+  }
+
+  const sc = toValue(selectionController)
+  const dp = toValue(dataProvider)
+  if (!sc || !dp) {
+    return
+  }
+
+  sc.clear(true)
+  const items = selected.map(s => dp.getTreeItem(s))
+  sc.select(items)
+})
 
 watch(shallowResponse, (r) => {
   if (r) {
@@ -50,7 +70,15 @@ function getNodeKey(item: TreeItem) {
 }
 
 function onSelectionChange(e: Event) {
-  emit('selection-changed', (e as CustomEvent).detail);
+  localSelectedLocations.value = (e as CustomEvent).detail as ISearchNode[]
+  emit("update:selected-locations", localSelectedLocations.value)
+}
+
+function isSelectedLocationsChanged(newSelection: ISearchNode[], oldSelection: ISearchNode[]) {
+  const equal = (a: ISearchNode, b: ISearchNode) => a.id === b.id && a.parentId === b.parentId && a.type === b.type
+
+  return newSelection.some(a => -1 === oldSelection.findIndex(b => equal(a, b))) ||
+    oldSelection.some(a => -1 === newSelection.findIndex(b => equal(a, b)))
 }
 
 </script>

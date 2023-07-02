@@ -1,5 +1,5 @@
 <template>
-  <li class="tvn">
+  <li ref="root" class="tvn">
     <div>
       <slot :item="item" :expand="expand" :collapse="collapse" :select="select" :deselect="deselect">
         <slot name="collapsible-state" :item="item" :expand="expand" :collapse="collapse">
@@ -13,7 +13,7 @@
       </slot>
     </div>
     <ul v-if="item.collapsibleState === CollapsibleState.Expanded">
-      <TreeViewNode ref="childNodes" v-for="child in children" :item="child" :get-key="getKey" :key="getKey(child)">
+      <TreeViewNode ref="vnChildren" v-for="child in children" :item="child" :get-key="getKey" :key="getKey(child)">
         <template v-slot:default="defaultSlot">
           <slot v-bind="defaultSlot" />
         </template>
@@ -39,6 +39,8 @@ import {
   onBeforeUnmount,
   watch,
   toValue,
+  nextTick,
+  toRaw,
 } from 'vue';
 import {
   TreeItem,
@@ -59,6 +61,9 @@ export interface Props {
   getKey: (node: TreeItem) => any;
 }
 
+defineOptions({
+  name: "TreeViewNode"
+})
 
 const props = defineProps<Props>();
 
@@ -70,13 +75,16 @@ defineSlots<{
 }>()
 
 const { item } = toRefs(props);
-const childNodes = ref();
+const vnChildren = ref()
 
 const dataProvider = inject(DataProviderKey)!;
 const selectionController = inject(SelectionControllerKey);
 const nodeComparer = inject(TreeItemComparerKey);
 const children = ref<TreeItem[] | undefined>();
+const root = ref<HTMLElement | null>()
 const needRenderSelectionControl = ref<boolean>(false);
+
+defineExpose({ expand, expandNode, collapse })
 
 if (selectionController) {
   watch(
@@ -101,7 +109,7 @@ onBeforeUnmount(() => {
 
 function collapse() {
   if (item.value.collapsibleState === CollapsibleState.None) {
-    return;
+    return
   }
   item.value.collapsibleState = CollapsibleState.Collapsed;
 }
@@ -110,7 +118,7 @@ function expand() {
   const it = toValue(item)
   const dp = toValue(dataProvider)
   if (it.collapsibleState === CollapsibleState.None) {
-    return;
+    return
   }
   if (children.value === undefined) {
     let ch = [] as TreeItem[]
@@ -129,19 +137,32 @@ function expand() {
   item.value.collapsibleState = CollapsibleState.Expanded;
 }
 
+async function expandNode(it: TreeItem, scrollIntoView: boolean) {
+  if (toRaw(it) === toRaw(item.value)) {
+    if (!scrollIntoView) {
+      expand()
+      await nextTick()
+    }
+    if (scrollIntoView && window !== undefined) {
+      root.value?.scrollIntoView(true)
+    }
+    return vnChildren.value
+  }
+}
+
 function select(event?: Event) {
   const it = toValue(item)
   const sc = toValue(selectionController);
-  if (!!sc && sc.canSelect(it)) {
-    sc.select(it, event);
+  if (sc) {
+    sc.select([it], event);
   }
 }
 
 function deselect(event?: Event) {
   const it = toValue(item)
   const sc = toValue(selectionController);
-  if (!!sc && sc.canDeselect(it)) {
-    sc.deselect(it, event);
+  if (sc) {
+    sc.deselect([it], event);
   }
 }
 </script>

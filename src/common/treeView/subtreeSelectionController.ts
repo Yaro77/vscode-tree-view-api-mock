@@ -18,15 +18,16 @@ export default class extends TreeViewSelectionController<TreeItem> {
     return this.selectionDidChangeEventTarget;
   }
 
-  select(item: TreeItem): void {
-    this.selectInternal(item);
+  select(items: TreeItem[]): void {
+    items.forEach(item => this.selectInternal(item))
 
     this.selectedItems = this.getSelectedItemsInternal();
     this.fireSelectionDidChange(this.selectedItems);
   }
 
-  deselect(item: TreeItem): void {
-    this.deselectInternal(item);
+  deselect(items: TreeItem[]): void {
+    items.forEach(item => this.deselectInternal(item))
+
     this.selectedItems = this.getSelectedItemsInternal();
     this.fireSelectionDidChange(this.selectedItems);
   }
@@ -122,23 +123,16 @@ export default class extends TreeViewSelectionController<TreeItem> {
     return ret;
   }
 
-  clear(): void {
+  clear(suspendSelectionDidChange?: boolean): void {
     const rootItems = this.getChildren();
     rootItems.forEach((it: any) => {
-      const item = this.dataProvider.getTreeItem(it)
-      this.deselectInternal(item);
+      this.deselectInternal(it);
     });
 
     this.selectedItems = []; // = this.getSelectedItemsInternal();
-    this.fireSelectionDidChange(this.selectedItems);
-  }
-
-  canSelect(): boolean {
-    return true
-  }
-
-  canDeselect(): boolean {
-    return true
+    if (!suspendSelectionDidChange) {
+      this.fireSelectionDidChange(this.selectedItems);
+    }
   }
 
   private getChildren(it?: TreeItem): TreeItem[] {

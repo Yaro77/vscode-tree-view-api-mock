@@ -7,7 +7,14 @@ export enum SearchNodeType {
   LocationArea,
 }
 
-export class SearchNode {
+export interface ISearchNode {
+  id: number
+  type: SearchNodeType
+  name: string
+  parentId?: number
+}
+
+export class SearchNode implements ISearchNode {
   id: number
   type: SearchNodeType
   name: string
@@ -59,5 +66,6 @@ export interface Response {
 }
 
 export interface Props {
-  response: Response
+  response: Response,
+  selectedLocations?: ISearchNode[]
 }
