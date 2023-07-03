@@ -36,6 +36,7 @@ import {
 } from './types';
 import {
   DataProviderKey,
+  FilterKey,
   SelectionControllerKey,
   TreeItemComparerKey,
 } from "./constants"
@@ -46,6 +47,7 @@ export interface Props {
   selectionController?: TreeViewSelectionController<any>;
   nodeComparer?: TreeItemComparer;
   getKey: (item: TreeItem) => any;
+  filter?: (element: any) => boolean;
 }
 
 const props = defineProps<Props>();
@@ -61,6 +63,7 @@ defineSlots<{
 
 
 const nodeComparer = ref(props.nodeComparer)!
+const filter = ref(props.filter)!
 const dataProvider = shallowRef(props.dataProvider)!
 const selectionController = shallowRef(props.selectionController)!
 const rootNodes = ref<TreeItem[]>([]);
@@ -73,26 +76,36 @@ defineExpose({
 provide(DataProviderKey, dataProvider);
 provide(SelectionControllerKey, selectionController);
 provide(TreeItemComparerKey, nodeComparer);
+provide(FilterKey, filter)
+
+watch(() => props.filter, (f) => {
+  filter.value = f
+  rootNodes.value = getRootNodes();
+})
 
 watch(
   dataProvider!,
-  (dp) => {
-    if (!dp) {
-      rootNodes.value = [];
-      return;
-    }
-    const roots = dp.getChildren();
-    let nodes = roots.map((n: any) => dp.getTreeItem(n));
-    const comparer = toValue(nodeComparer)
-    if (comparer) {
-      nodes.sort(comparer);
-    }
-    rootNodes.value = nodes;
+  () => {
+    rootNodes.value = getRootNodes();
   },
   { immediate: true }
 );
 
 const isEmptyTree = computed<boolean>(() => rootNodes.value.length === 0);
+
+function getRootNodes(): TreeItem[] {
+  const dp = toValue(dataProvider)
+  if (!dp) {
+    return []
+  }
+  const roots = dp.getChildren();
+  let nodes = roots.filter(n => deepMatch(n)).map((n: any) => dp.getTreeItem(n));
+  const comparer = toValue(nodeComparer)
+  if (comparer) {
+    nodes.sort(comparer);
+  }
+  return nodes
+}
 
 async function reveal(element: any) {
   const dp = toValue(dataProvider)
@@ -123,6 +136,14 @@ async function reveal(element: any) {
       }
     }
   }
+}
+
+function deepMatch(element: any): boolean {
+  if (!filter!.value || filter.value(element)) {
+    return true
+  }
+  const children = dataProvider!.value?.getChildren(element) ?? [];
+  return children.some(ch => deepMatch(ch))
 }
 
 </script>

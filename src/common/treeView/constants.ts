@@ -14,3 +14,4 @@ export const TreeItemComparerKey = Symbol() as InjectionKey<
   Ref<TreeItemComparer | undefined>
 >;
 
+export const FilterKey = Symbol() as InjectionKey<Ref<((element: any) => boolean) | undefined>>

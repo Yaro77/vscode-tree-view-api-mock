@@ -2,9 +2,12 @@
   <AppContainer>
     <template #default="{ addEvent }">
       <div class="tv-container">
-        <div><button @click="clearSelection">Clear</button></div>
-        <SearchLocationTreeView v-model:selected-locations="selectedLocations" @update:selected-locations="addEvent"
-          :response="succeededResponse" />
+        <div class="controls">
+          <label class="controls__filter">🔍<input v-model="filter" aria-label="Filter" placeholder="Filter..." /></label>
+          <button @click="clearSelection">Clear</button>
+        </div>
+        <SearchLocationTreeView v-model:selected-locations="selectedLocations" :filter="filter"
+          @update:selected-locations="addEvent" :response="succeededResponse" />
       </div>
     </template>
   </AppContainer>
@@ -20,6 +23,7 @@ const succeededResponse: Response = JSON.parse('{"regionIds":[14798,15133],"loca
 console.log(succeededResponse)
 
 const selectedLocations = ref<ISearchNode[]>()
+const filter = ref<string>()
 
 function clearSelection() {
   selectedLocations.value = []
@@ -40,6 +44,24 @@ function clearSelection() {
 
   > :nth-child(2) {
     flex: 1 1 0;
+  }
+}
+
+.controls {
+  display: flex;
+  gap: 8px;
+}
+
+.controls__filter {
+  display: inline-flex;
+  gap: 0px;
+  background-color: #fff;
+  border-radius: 2px;
+  overflow: hidden;
+
+  input {
+    border: none;
+    outline: none;
   }
 }
 </style>

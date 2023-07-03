@@ -68,4 +68,5 @@ export interface Response {
 export interface Props {
   response: Response,
   selectedLocations?: ISearchNode[]
+  filter?: string
 }

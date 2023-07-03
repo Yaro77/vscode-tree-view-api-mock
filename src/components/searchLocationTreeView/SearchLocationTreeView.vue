@@ -1,5 +1,10 @@
 <template>
-  <TreeView :data-provider="dataProvider" :selection-controller="selectionController" :get-key="getNodeKey">
+  <TreeView :data-provider="dataProvider" :selection-controller="selectionController" :filter="localFilter"
+    :get-key="getNodeKey" :node-comparer="compareNodes">
+    <template #empty-tree>
+      <template v-if="!!localFilter">Nothing was found</template>
+      <template v-else>Empty</template>
+    </template>
     <template #node-selection-state="selectionStateSlot">
       <TreeViewNodeCheckMarkExample v-bind="selectionStateSlot" />
     </template>
@@ -9,9 +14,9 @@
 <script setup lang="ts" >
 import TreeView from "@/common/treeView/TreeView.vue"
 import TreeViewNodeCheckMarkExample from "../locationTreeView/TreeViewNodeCheckMarkExample.vue";
-import { ISearchNode, Props, SearchTreeItem } from "./types"
+import { ISearchNode, Props, SearchNode, SearchTreeItem } from "./types"
 import { ref, shallowRef, toValue, watch } from "vue";
-import { TreeItem, TreeViewDataProvider, TreeViewSelectionController } from "@/common/treeView/types";
+import { TreeItem, TreeItemComparer, TreeViewDataProvider, TreeViewSelectionController } from "@/common/treeView/types";
 import DataProvider from "./dataProvider";
 import SubtreeSelectionController from "@/common/treeView/subtreeSelectionController";
 // import ClassicSelectionController from "@/common/treeView/classicSelectionController";
@@ -19,6 +24,8 @@ import SubtreeSelectionController from "@/common/treeView/subtreeSelectionContro
 const props = withDefaults(defineProps<Props>(), {
   selectedLocations: () => ([])
 })
+
+const localFilter = ref<((element: SearchNode) => boolean) | undefined>()
 const shallowResponse = shallowRef(props.response)
 
 const dataProvider = ref<TreeViewDataProvider>()
@@ -29,6 +36,15 @@ const localSelectedLocations = ref<ISearchNode[]>([])
 const emit = defineEmits<{
   'update:selected-locations': [selection: ISearchNode[]];
 }>();
+
+watch(() => props.filter, f => {
+  if (f) {
+    localFilter.value = (element: SearchNode) => element.name.toLocaleLowerCase().indexOf(f.toLocaleLowerCase()) >= 0
+  } else {
+    localFilter.value = undefined
+  }
+}, { immediate: true })
+
 
 watch(() => props.selectedLocations, (selected) => {
   if (!isSelectedLocationsChanged(selected ?? [], localSelectedLocations.value)) {
@@ -79,6 +95,32 @@ function isSelectedLocationsChanged(newSelection: ISearchNode[], oldSelection: I
 
   return newSelection.some(a => -1 === oldSelection.findIndex(b => equal(a, b))) ||
     oldSelection.some(a => -1 === newSelection.findIndex(b => equal(a, b)))
+}
+
+function compareNodes(a: TreeItem, b: TreeItem): number {
+  const sa = a as SearchTreeItem
+  const sb = b as SearchTreeItem
+
+  if (sa.node.id === -133) {
+    return 1
+  }
+
+  if (sb.node.id === -133) {
+    return -1
+  }
+
+  if (sa.node.name < sb.node.name) {
+    return -1
+  }
+  if (sa.node.name > sb.node.name) {
+    return 1
+  }
+  return 0
+}
+
+// @ts-ignore
+function invertCompare(compare: TreeItemComparer): TreeItemComparer {
+  return (a: TreeItem, b: TreeItem) => -compare(a, b)
 }
 
 </script>

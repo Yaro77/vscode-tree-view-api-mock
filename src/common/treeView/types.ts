@@ -59,6 +59,7 @@ export interface DefaultSlotProps {
 
 export interface CollapsibleStateSlotProps {
   item: TreeItem
+  filterAwareCollapsibleState: CollapsibleState
   expand: () => void
   collapse: () => void
 }
